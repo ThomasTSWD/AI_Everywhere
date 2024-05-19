@@ -35,7 +35,7 @@ function createWindow() {
     views['Mistral'].webContents.loadURL(`https://chat.mistral.ai/`);
     views['Claude'].webContents.loadURL(`https://claude.ai/`);
     views['Otio'].webContents.loadURL(`https://app.otio.ai/`);
-    views['Perplexity'].webContents.loadURL(`https://www.perplexity.ai/collections/Rdaction-Email-QezJEyVWRUG8oV_rsz_4Yg`);
+    views['Perplexity'].webContents.loadURL(`https://www.perplexity.ai/collections/Rdaction-Email-_ue7BZDJR9iEKpi9Htpcxg`);
     views['Huggingface'].webContents.loadURL(`https://huggingface.co/chat/`);
 
 
