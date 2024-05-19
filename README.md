@@ -2,7 +2,7 @@
 
 ![AI Everywhere](screenshot.JPG)
 
-The Intelligent Assistant app is a desktop application with several built-in AI features, including ChatGPT, Mistral AI, Otio AI, Perplexity and Claude AI. It offers a chat interface for interacting with AIs. Views are responsive and adapt to window size. The application features an intuitive main menu, and windows always remain in the foreground. Conversations and states are preserved when tabs are changed.
+The Intelligent Assistant app is a desktop application who integrates AI features, including ChatGPT, Mistral AI, Otio AI, Perplexity, Claude AI and Huggingface. It offers a chat interface for interacting with AIs. Views are responsive and adapt to window size. The application features an intuitive main menu, and windows always remain in the foreground. Conversations and states are preserved when tabs are changed.
 
 **Using AI Fast !**
 
