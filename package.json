@@ -1,0 +1,15 @@
+{
+  "name": "AI Everywhere",
+  "version": "1.0.0",
+  "description": "AI Everywhere",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "TSWD",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^30.0.6",
+    "electron-packager": "^17.1.1"
+  }
+}
