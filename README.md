@@ -1,5 +1,9 @@
 # AI Everywhere
 
+
+!!!! Revoir l'action pour packager car app 700mo ! alors que sans actions = 100mo !
+
+
 ![AI Everywhere](screenshot.JPG)
 
 The Intelligent Assistant app is a desktop application who integrates AI features, including ChatGPT, Mistral AI, Otio AI, Perplexity, Claude AI and Huggingface. It offers a chat interface for interacting with AIs. Views are responsive and adapt to window size. The application features an intuitive main menu, and windows always remain in the foreground. Conversations and states are preserved when tabs are changed.
