@@ -4,9 +4,25 @@ on:
     branches:
       - main
 jobs:
-  build-and-release:
+  prepare:
     if: contains(github.event.head_commit.message, 'v')
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract_version.outputs.VERSION }}
+      repo_name: ${{ steps.get_repo.outputs.REPO_NAME }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Get repository name
+      id: get_repo
+      run: echo "REPO_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_OUTPUT
+    - name: Extract version from commit message
+      id: extract_version
+      run: echo "VERSION=$(echo '${{ github.event.head_commit.message }}' | grep -o 'v[0-9]*\.[0-9]*\.[0-9]*')" >> $GITHUB_OUTPUT
+
+  build-windows:
+    needs: prepare
+    runs-on: windows-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -14,66 +30,79 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '16'
-    - name: Get repository name
-      id: get_repo
-      run: echo "REPO_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
     - name: Install dependencies
       run: npm install
-    - name: Extract version from commit message
-      id: extract_version
-      run: echo "VERSION=$(echo '${{ github.event.head_commit.message }}' | grep -o 'v[0-9]*\.[0-9]*\.[0-9]*')" >> $GITHUB_OUTPUT
     - name: Update package.json version
       run: |
-        VERSION_WITHOUT_V=$(echo ${{ steps.extract_version.outputs.VERSION }} | sed 's/^v//')
+        $VERSION_WITHOUT_V = "${{ needs.prepare.outputs.version }}".TrimStart('v')
         npm version $VERSION_WITHOUT_V --no-git-tag-version
     - name: Build for Windows
-      run: |
-        npx electron-packager . "${{ env.REPO_NAME }}" --platform=win32 --arch=x64 --overwrite
-    - name: Build for macOS
-      run: |
-        npx electron-packager . "${{ env.REPO_NAME }}" --platform=darwin --arch=x64 --overwrite
+      run: npx electron-packager . "${{ needs.prepare.outputs.repo_name }}" --platform=win32 --arch=x64 --overwrite
     - name: Zip Windows build
-      run: zip -r ${{ env.REPO_NAME }}-Windows-${{ steps.extract_version.outputs.VERSION }}.zip "${{ env.REPO_NAME }}-win32-x64"
-    - name: Zip macOS build
-      run: zip -r ${{ env.REPO_NAME }}-macOS-${{ steps.extract_version.outputs.VERSION }}.zip "${{ env.REPO_NAME }}-darwin-x64"
-    - name: Check if tag exists
-      id: check_tag
+      run: Compress-Archive -Path "${{ needs.prepare.outputs.repo_name }}-win32-x64" -DestinationPath "${{ needs.prepare.outputs.repo_name }}-Windows-${{ needs.prepare.outputs.version }}.zip"
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-build
+        path: ${{ needs.prepare.outputs.repo_name }}-Windows-${{ needs.prepare.outputs.version }}.zip
+
+  build-macos:
+    needs: prepare
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - name: Install dependencies
+      run: npm install
+    - name: Update package.json version
       run: |
-        TAG_EXISTS=$(git tag -l "${{ steps.extract_version.outputs.VERSION }}")
-        if [ -n "$TAG_EXISTS" ]; then
-          echo "Tag already exists."
-          echo "tag_exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "tag_exists=false" >> $GITHUB_OUTPUT
-        fi
+        VERSION_WITHOUT_V=$(echo ${{ needs.prepare.outputs.version }} | sed 's/^v//')
+        npm version $VERSION_WITHOUT_V --no-git-tag-version
+    - name: Build for macOS
+      run: npx electron-packager . "${{ needs.prepare.outputs.repo_name }}" --platform=darwin --arch=x64 --overwrite
+    - name: Zip macOS build
+      run: zip -r ${{ needs.prepare.outputs.repo_name }}-macOS-${{ needs.prepare.outputs.version }}.zip "${{ needs.prepare.outputs.repo_name }}-darwin-x64"
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-build
+        path: ${{ needs.prepare.outputs.repo_name }}-macOS-${{ needs.prepare.outputs.version }}.zip
+
+  create-release:
+    needs: [prepare, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
     - name: Create Release
       id: create_release
-      if: steps.check_tag.outputs.tag_exists == 'false'
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.extract_version.outputs.VERSION }}
-        release_name: Release ${{ steps.extract_version.outputs.VERSION }}
+        tag_name: ${{ needs.prepare.outputs.version }}
+        release_name: Release ${{ needs.prepare.outputs.version }}
         draft: false
         prerelease: false
     - name: Upload Windows Build
       uses: actions/upload-release-asset@v1
-      if: steps.check_tag.outputs.tag_exists == 'false'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.REPO_NAME }}-Windows-${{ steps.extract_version.outputs.VERSION }}.zip
-        asset_name: ${{ env.REPO_NAME }}-Windows-${{ steps.extract_version.outputs.VERSION }}.zip
+        asset_path: ./windows-build/${{ needs.prepare.outputs.repo_name }}-Windows-${{ needs.prepare.outputs.version }}.zip
+        asset_name: ${{ needs.prepare.outputs.repo_name }}-Windows-${{ needs.prepare.outputs.version }}.zip
         asset_content_type: application/zip
     - name: Upload macOS Build
       uses: actions/upload-release-asset@v1
-      if: steps.check_tag.outputs.tag_exists == 'false'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.REPO_NAME }}-macOS-${{ steps.extract_version.outputs.VERSION }}.zip
-        asset_name: ${{ env.REPO_NAME }}-macOS-${{ steps.extract_version.outputs.VERSION }}.zip
+        asset_path: ./macos-build/${{ needs.prepare.outputs.repo_name }}-macOS-${{ needs.prepare.outputs.version }}.zip
+        asset_name: ${{ needs.prepare.outputs.repo_name }}-macOS-${{ needs.prepare.outputs.version }}.zip
         asset_content_type: application/zip
