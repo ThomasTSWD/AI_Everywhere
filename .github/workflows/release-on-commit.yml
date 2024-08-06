@@ -1,3 +1,7 @@
+# .github/workflows/release-on-commit.yml
+# Allow Read / Write Settings > Actions
+# Commit with v.x.x.x
+
 name: Release Electron App on Commit Message
 on:
   push:
