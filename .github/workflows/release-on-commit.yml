@@ -41,7 +41,7 @@ jobs:
         $VERSION_WITHOUT_V = "${{ needs.prepare.outputs.version }}".TrimStart('v')
         npm version $VERSION_WITHOUT_V --no-git-tag-version
     - name: Build for Windows
-      run: npx electron-packager . "${{ needs.prepare.outputs.repo_name }}" --platform=win32 --arch=x64 --icon=assets/icon.ico --overwrite
+      run: npx electron-packager . "${{ needs.prepare.outputs.repo_name }}" --platform=win32 --arch=x64 --icon=assets/icon.ico --prune=true --asar --overwrite
     - name: Zip Windows build
       run: Compress-Archive -Path "${{ needs.prepare.outputs.repo_name }}-win32-x64" -DestinationPath "${{ needs.prepare.outputs.repo_name }}-Windows-${{ needs.prepare.outputs.version }}.zip"
     - name: Upload Windows artifact
@@ -67,7 +67,7 @@ jobs:
         VERSION_WITHOUT_V=$(echo ${{ needs.prepare.outputs.version }} | sed 's/^v//')
         npm version $VERSION_WITHOUT_V --no-git-tag-version
     - name: Build for macOS
-      run: npx electron-packager . "${{ needs.prepare.outputs.repo_name }}" --platform=darwin --arch=x64 --icon=assets/icon.ico --overwrite
+      run: npx electron-packager . "${{ needs.prepare.outputs.repo_name }}" --platform=darwin --arch=x64 --icon=assets/icon.ico --prune=true --asar --overwrite
     - name: Zip macOS build
       run: zip -r ${{ needs.prepare.outputs.repo_name }}-macOS-${{ needs.prepare.outputs.version }}.zip "${{ needs.prepare.outputs.repo_name }}-darwin-x64"
     - name: Upload macOS artifact
