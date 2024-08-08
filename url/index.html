@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>URL Input avec WebView</title>
+	<style>
+		/* Style pour le thème sombre */
+		body {
+			background-color: #1e1e1e;
+			/* Fond sombre */
+			color: #d1d1d1;
+			/* Texte clair */
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: 100vh;
+		}
+
+		h1 {
+			margin-bottom: 20px;
+		}
+
+		form {
+			background-color: #2d2d2d;
+			/* Fond du formulaire */
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+		}
+
+		input[type="text"] {
+			width: 90%;
+			padding: 10px;
+			border: 1px solid #444;
+			border-radius: 4px;
+			background-color: #3c3c3c;
+			color: #d1d1d1;
+			font-size: 16px;
+		}
+
+		button {
+			background-color: #007bff;
+			/* Couleur du bouton */
+			border: none;
+			color: white;
+			padding: 10px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 16px;
+			margin-top: 10px;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+		button:hover {
+			background-color: #0056b3;
+			/* Couleur du bouton au survol */
+		}
+
+		#linkContainer {
+			margin-top: 20px;
+		}
+
+		a {
+			color: #1e90ff;
+			/* Couleur du lien */
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Entrez une URL</h1>
+
+	<!-- Formulaire pour saisir l'URL -->
+	<form id="urlForm">
+		<input type="text" id="urlInput" placeholder="https://example.com" required>
+		<button type="submit">Valider</button>
+	</form>
+
+	<!-- Zone pour afficher le lien -->
+	<div id="linkContainer"></div>
+
+	<script>
+		// Fonction pour gérer la soumission du formulaire
+		document.getElementById('urlForm').addEventListener('submit', function (event) {
+			event.preventDefault(); // Empêche la soumission du formulaire
+
+			// Récupère la valeur de l'input
+			const url = document.getElementById('urlInput').value;
+
+			// Crée un élément de lien
+			const link = document.createElement('a');
+			link.href = url;
+			link.textContent = url;
+			link.target = '_blank'; // Ouvre le lien dans un nouvel onglet
+
+			// Affiche le lien dans le conteneur
+			const linkContainer = document.getElementById('linkContainer');
+			linkContainer.innerHTML = ''; // Efface le contenu précédent
+			linkContainer.appendChild(link);
+		});
+	</script>
+</body>
+
+</html>

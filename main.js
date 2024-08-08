@@ -28,6 +28,7 @@ function createWindow() {
     views['Otio'] = new BrowserView();
     views['Perplexity'] = new BrowserView();
     views['Huggingface'] = new BrowserView();
+    views['customUrl'] = new BrowserView();
 
     // Charger les URL dans les vues respectives
     views['webGpt'].webContents.loadURL(`file://${__dirname}/gpt/index.html`);
@@ -37,7 +38,7 @@ function createWindow() {
     views['Otio'].webContents.loadURL(`https://app.otio.ai/`);
     views['Perplexity'].webContents.loadURL(`https://www.perplexity.ai/collections/Rdaction-Email-_ue7BZDJR9iEKpi9Htpcxg`);
     views['Huggingface'].webContents.loadURL(`https://huggingface.co/chat/`);
-
+    views['customUrl'].webContents.loadURL(`file://${__dirname}/url/index.html`);
 
     const menuOptions = [
         { label: 'ChatGPT (3.5)', view: 'chatGpt' },
@@ -47,6 +48,7 @@ function createWindow() {
         { label: 'Huggingface (GPT\'S)', view: 'Huggingface' },
         { label: 'Otio (URL)', view: 'Otio' },
         { label: 'Perplexity (Mail, Search)', view: 'Perplexity' },
+        { label: 'URL', view: 'customUrl' },
     ];
 
 
